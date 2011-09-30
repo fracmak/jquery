@@ -54,16 +54,23 @@ jQuery.fn.extend({
 				if ( elem.nodeType === 1 ) {
 					if ( !elem.className && classNames.length === 1 ) {
 						elem.className = value;
-
 					} else {
-						setClass = " " + elem.className + " ";
-
-						for ( c = 0, cl = classNames.length; c < cl; c++ ) {
-							if ( !~setClass.indexOf( " " + classNames[ c ] + " " ) ) {
-								setClass += classNames[ c ] + " ";
+						if ( elem.classList ) {
+							for ( c = 0, cl = classNames.length; c < cl; c++ ) {
+								if ( classNames[ c ] !== '' ) {
+									elem.classList.add( classNames[ c ] );
+								}
 							}
+						} else {
+							setClass = " " + elem.className + " ";
+
+							for ( c = 0, cl = classNames.length; c < cl; c++ ) {
+								if ( !~setClass.indexOf( " " + classNames[ c ] + " " ) ) {
+									setClass += classNames[ c ] + " ";
+								}
+							}
+							elem.className = jQuery.trim( setClass );
 						}
-						elem.className = jQuery.trim( setClass );
 					}
 				}
 			}
@@ -89,12 +96,19 @@ jQuery.fn.extend({
 
 				if ( elem.nodeType === 1 && elem.className ) {
 					if ( value ) {
-						className = (" " + elem.className + " ").replace( rclass, " " );
-						for ( c = 0, cl = classNames.length; c < cl; c++ ) {
-							className = className.replace(" " + classNames[ c ] + " ", " ");
+						if ( elem.classList ) {
+							for ( c = 0, cl = classNames.length; c < cl; c++ ) {
+								if ( classNames[ c ] !== '' ) {
+									elem.classList.remove( classNames[ c ] );
+								}
+							}
+						} else {
+							className = (" " + elem.className + " ").replace( rclass, " " );
+							for ( c = 0, cl = classNames.length; c < cl; c++ ) {
+								className = className.replace(" " + classNames[ c ] + " ", " ");
+							}
+							elem.className = jQuery.trim( className );
 						}
-						elem.className = jQuery.trim( className );
-
 					} else {
 						elem.className = "";
 					}
@@ -125,9 +139,15 @@ jQuery.fn.extend({
 					classNames = value.split( rspace );
 
 				while ( (className = classNames[ i++ ]) ) {
-					// check each className given, space seperated list
-					state = isBool ? state : !self.hasClass( className );
-					self[ state ? "addClass" : "removeClass" ]( className );
+					if (! this.classList ) {
+						if ( className !== '' ) {
+							this.classList.toggle(className);
+						}
+					} else {
+						// check each className given, space seperated list
+						state = isBool ? state : !self.hasClass( className );
+						self[ state ? "addClass" : "removeClass" ]( className );
+					}
 				}
 
 			} else if ( type === "undefined" || type === "boolean" ) {
